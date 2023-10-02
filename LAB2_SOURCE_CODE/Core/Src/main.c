@@ -33,7 +33,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TIME 50
+#define TIME 25
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -141,7 +141,7 @@ int main(void)
   enum state_led current_sate = LED_1;
   set_timer(TIME);
   clear_all_segment();
-  int toggle_counter = 4;
+  int toggle_counter = 5;
 
   /* USER CODE END 2 */
 
@@ -156,6 +156,11 @@ int main(void)
 			  index_led = 0;
 		  }
 		  HAL_GPIO_TogglePin(GPIOA , GPIO_PIN_5);
+		  toggle_counter--;
+		  if(toggle_counter <= 0){
+			  HAL_GPIO_TogglePin(GPIOA , GPIO_PIN_4);
+			  toggle_counter=4;
+		  }
 	  }
     /* USER CODE END WHILE */
 
