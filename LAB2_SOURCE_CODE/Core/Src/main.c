@@ -53,7 +53,7 @@ void SystemClock_Config(void);
 static void MX_TIM2_Init(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
-
+void update7SEG(int index);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -64,6 +64,47 @@ enum state_led {
 	LED_3,
 	LED_4
 };
+const int MAX_LED = 4;
+int index_led = 0;
+int led_buffer[4] = {3,5,7,9};
+void clear_all_segment(){
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
+}
+void update7SEG(int index){
+	switch(index){
+	case 0:
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, RESET);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, SET);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
+		display7SEG(led_buffer[0]);
+		break;
+	case 1:
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, SET);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, SET);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
+		display7SEG(led_buffer[1]);
+		break;
+	case 2:
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, SET);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, RESET);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
+		display7SEG(led_buffer[2]);
+		break;
+	case 3:
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, SET);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, SET);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
+		display7SEG(led_buffer[3]);
+		break;
+	}
+}
 /* USER CODE END 0 */
 
 /**
@@ -97,9 +138,10 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
-  enum state_led current_sate = LED_1;
+  //enum state_led current_sate = LED_1;
   set_timer(TIME);
-  int toggle_counter = 2;
+  clear_all_segment();
+  // int toggle_counter = 4;
 
   /* USER CODE END 2 */
 
@@ -107,75 +149,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  switch(current_sate){
-	  case LED_1:
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, RESET);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, SET);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
-		  display7SEG(1);
-		  if(flag){
-			  toggle_counter--;
-			  if(toggle_counter <= 0){
-				  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
-				  toggle_counter = 2;
-			  }
-			  set_timer(TIME);
-			  current_sate = LED_2;
-			  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	  if(flag){
+		  set_timer(TIME);
+		  update7SEG(index_led++);
+		  if(index_led >=4){
+			  index_led = 0;
 		  }
-		  break;
-	  case LED_2:
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, SET);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, SET);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
-		  display7SEG(2);
-		  if(flag){
-			  toggle_counter--;
-			  if(toggle_counter <= 0){
-				  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
-				  toggle_counter = 2;
-			  }
-			  set_timer(TIME);
-			  current_sate = LED_3;
-			  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-		  }
-		  break;
-	  case LED_3:
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, SET);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, RESET);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
-		  display7SEG(3);
-		  if(flag){
-			  toggle_counter--;
-			  if(toggle_counter <= 0){
-				  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
-				  toggle_counter = 2;
-			  }
-			  set_timer(TIME);
-			  current_sate = LED_4;
-			  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-		  }
-		  break;
-	  case LED_4:
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, SET);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, SET);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
-		  display7SEG(0);
-		  if(flag){
-			  toggle_counter--;
-			  if(toggle_counter <= 0){
-				  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
-				  toggle_counter = 2;
-			  }
-			  set_timer(TIME);
-			  current_sate = LED_1;
-			  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-		  }
-		  break;
+		  HAL_GPIO_TogglePin(GPIOA , GPIO_PIN_5);
 	  }
     /* USER CODE END WHILE */
 
