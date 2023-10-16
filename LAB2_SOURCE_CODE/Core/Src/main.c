@@ -160,9 +160,7 @@ int main(void)
 		  updateClockBufer();
 		  set_timer(TIME);
 		  update7SEG(index_led++);
-		  if(index_led >=4){
-			  index_led = 0;
-		  }
+		  index_led = index_led % 4;
 		  toggle_counter--;
 		  if(toggle_counter <= 0){
 			  second++;
