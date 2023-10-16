@@ -58,51 +58,17 @@ void update7SEG(int index);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-enum state_led {
-	LED_1,
-	LED_2,
-	LED_3,
-	LED_4
-};
-const int MAX_LED = 4;
-int index_led = 0;
-int led_buffer[4] = {3,5,7,9};
-void clear_all_segment(){
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, SET);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, SET);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
+int timer0_counter = 0;
+int timer0_flag = 0;
+int TIMER_CYCLE = 10;
+void setTimer0 ( int duration ) {
+	timer0_counter = duration / TIMER_CYCLE ;
+	timer0_flag = 0;
 }
-void update7SEG(int index){
-	switch(index){
-	case 0:
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, RESET);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, SET);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
-		display7SEG(led_buffer[0]);
-		break;
-	case 1:
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, SET);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, SET);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
-		display7SEG(led_buffer[1]);
-		break;
-	case 2:
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, SET);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, RESET);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
-		display7SEG(led_buffer[2]);
-		break;
-	case 3:
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, SET);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, SET);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
-		display7SEG(led_buffer[3]);
-		break;
+void timer1_run(){
+	if( timer0_counter > 0) {
+		timer0_counter--;
+		if( timer0_counter == 0) timer0_flag = 1;
 	}
 }
 /* USER CODE END 0 */
@@ -138,29 +104,17 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
-  enum state_led current_sate = LED_1;
-  set_timer(TIME);
-  clear_all_segment();
-  int toggle_counter = 5;
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  setTimer0(10) ;
   while (1)
   {
-	  if(flag){
-		  set_timer(TIME);
-		  update7SEG(index_led++);
-		  if(index_led >=4){
-			  index_led = 0;
-		  }
-		  HAL_GPIO_TogglePin(GPIOA , GPIO_PIN_5);
-		  toggle_counter--;
-		  if(toggle_counter <= 0){
-			  HAL_GPIO_TogglePin(GPIOA , GPIO_PIN_4);
-			  toggle_counter=4;
-		  }
+	  if(timer0_flag == 1) {
+		  HAL_GPIO_TogglePin (GPIOA, GPIO_PIN_5);
+		  setTimer0(2000) ;
 	  }
     /* USER CODE END WHILE */
 
@@ -292,7 +246,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim){
-	timer_run();
+	timer1_run();
 }
 /* USER CODE END 4 */
 
