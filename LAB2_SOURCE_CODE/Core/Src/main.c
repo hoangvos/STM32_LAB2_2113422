@@ -64,6 +64,7 @@ enum state_led {
 	LED_3,
 	LED_4
 };
+int hour = 15 , minute = 8 , second = 58;
 const int MAX_LED = 4;
 int index_led = 0;
 int led_buffer[4] = {3,5,7,9};
@@ -104,6 +105,12 @@ void update7SEG(int index){
 		display7SEG(led_buffer[3]);
 		break;
 	}
+}
+void updateClockBufer(){
+	led_buffer[0] = hour/10;
+	led_buffer[1] = hour%10;
+	led_buffer[2] = minute/10;
+	led_buffer[3] = minute%10;
 }
 /* USER CODE END 0 */
 
@@ -150,17 +157,30 @@ int main(void)
   while (1)
   {
 	  if(flag){
+		  updateClockBufer();
 		  set_timer(TIME);
 		  update7SEG(index_led++);
 		  if(index_led >=4){
 			  index_led = 0;
 		  }
-		  HAL_GPIO_TogglePin(GPIOA , GPIO_PIN_5);
 		  toggle_counter--;
 		  if(toggle_counter <= 0){
+			  second++;
+			  if(second >= 60){
+				  second = 0;
+				  minute++;
+			  }
+			  if(minute >= 60){
+				  minute = 0;
+				  hour++;
+			  }
+			  if(hour >= 24){
+				  hour = 0;
+			  }
 			  HAL_GPIO_TogglePin(GPIOA , GPIO_PIN_4);
 			  toggle_counter=4;
 		  }
+		  HAL_GPIO_TogglePin(GPIOA , GPIO_PIN_5);
 	  }
     /* USER CODE END WHILE */
 
