@@ -1,2 +1,6 @@
-7_SEGMENT_LED.c:13:6:display7SEG	16	static
-7_SEGMENT_LED.c:107:6:init_led8x8	24	static
+7_SEGMENT_LED.c:14:6:display7SEG	16	static
+7_SEGMENT_LED.c:110:6:init_led8x8	24	static
+7_SEGMENT_LED.c:159:6:clear_Led_8x8	24	static
+7_SEGMENT_LED.c:166:6:scanRowMatrix	24	static
+7_SEGMENT_LED.c:173:6:updateCurBuffer	16	static
+7_SEGMENT_LED.c:188:6:updateLEDMatrix	16	static

@@ -113,62 +113,18 @@ void updateClockBufer(){
 	led_buffer[3] = minute%10;
 }
 
-
 const int MAX_LED_MATRIX = 8;
 int index_led_matrix = 0;
-uint8_t matrix_buffer[8] = {0x00, 0xfc, 0xfe, 0x12, 0x12, 0xfe, 0xfc, 0x00};
-
+uint8_t matrix_buffer[] = {0x00, 0xff, 0xff, 0x18, 0x18, 0xff, 0xff, 0x00,   // H
+							0x00, 0x7e, 0xff, 0x81, 0x81, 0xff, 0x7e, 0x00,  // O
+							0x00, 0xfc, 0xfe, 0x33, 0x33, 0xfe, 0xfc, 0x00,  // A
+							0x00, 0xff, 0x03, 0x0c, 0x30, 0xc0, 0xff, 0x00,  // N
+							0x00, 0x7e, 0xff, 0x81, 0x81, 0x91, 0xf3, 0x73   // G
+};
 // INIT LED 8x8
 struct led8x8* led;
-
 // INIT lED 8x8
-void clear_Led_8x8(struct led8x8* led){
-	for(int i = 0; i < 8; i++){
-		HAL_GPIO_WritePin(led->col_port, led->col[i], SET);
-		HAL_GPIO_WritePin(led->row_port, led->row[i], SET);
-	}
-}
-void scanRowMatrix(struct led8x8* led){
-	for(int i = 0; i < 8; i++){
-		if((led->cur_matrix_buffer[led->index_led_matrix] >> i) & 0x01){
-			HAL_GPIO_WritePin(led->row_port, led->row[i], RESET);
-		}
-	}
-}
-void updateLEDMatrix(struct led8x8* led) {
-	clear_Led_8x8(led);
-	led->index_led_matrix++;
-	clear_Led_8x8(led);
-	switch(led->index_led_matrix){
-		case 0:
-			HAL_GPIO_WritePin(led->col_port, led->col[0], RESET);
-			break;
-		case 1:
-			HAL_GPIO_WritePin(led->col_port, led->col[1], RESET);
-			break;
-		case 2:
-			HAL_GPIO_WritePin(led->col_port, led->col[2], RESET);
-			break;
-		case 3:
-			HAL_GPIO_WritePin(led->col_port, led->col[3], RESET);
-			break;
-		case 4:
-			HAL_GPIO_WritePin(led->col_port, led->col[4], RESET);
-			break;
-		case 5:
-			HAL_GPIO_WritePin(led->col_port, led->col[5], RESET);
-			break;
-		case 6:
-			HAL_GPIO_WritePin(led->col_port, led->col[6], RESET);
-			break;
-		case 7:
-			HAL_GPIO_WritePin(led->col_port, led->col[7], RESET);
-			break;
-		default:
-			break;
-	}
-	scanRowMatrix(led);
-}
+
 /* USER CODE END 0 */
 
 /**
@@ -207,10 +163,12 @@ int main(void)
   set_timer_8(10);
   clear_all_segment();
   int toggle_counter = 5;
+  //INIT 8x8 lED
   init_led8x8(led , COL0_Pin, COL1_Pin, COL2_Pin, COL3_Pin, COL4_Pin, COL5_Pin, COL6_Pin, COL7_Pin,
 		  ROW0_Pin, ROW1_Pin, ROW2_Pin, ROW3_Pin, ROW4_Pin, ROW5_Pin, ROW6_Pin, ROW7_Pin,
 		  GPIOA, GPIOB,
-		  matrix_buffer);
+		  matrix_buffer,
+		  sizeof(matrix_buffer)/sizeof(uint8_t));
 
   /* USER CODE END 2 */
 
@@ -244,7 +202,10 @@ int main(void)
 	  }
 	  if(flag_8){
 		  updateLEDMatrix(led);
-		  if(led->index_led_matrix >= MAX_LED_MATRIX) led->index_led_matrix = 0;
+		  if(led->index_led_matrix >= MAX_LED_MATRIX){
+			  led->index_led_matrix = 0;
+			  updateCurBuffer(led);
+		  }
 		  set_timer_8(1);
 	  }
     /* USER CODE END WHILE */

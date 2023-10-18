@@ -9,6 +9,7 @@
 #include<stdint.h>
 #include<stm32f103x6.h>
 #include<string.h>
+#include<stdlib.h>
 
 void display7SEG(int num){
 	switch(num){
@@ -104,6 +105,8 @@ void display7SEG(int num){
 		break;
 	}
 }
+
+
 void init_led8x8(
 		struct led8x8* led,
 		uint16_t col_0,
@@ -124,7 +127,8 @@ void init_led8x8(
 		uint16_t row_7,
 		GPIO_TypeDef* col_port,
 		GPIO_TypeDef* row_port,
-		uint8_t cur_matrix_buffer[]){
+		uint8_t cur_matrix_buffer[],
+		int max_size_buffer){
 	led->col[0] = col_0;
 	led->col[1] = col_1;
 	led->col[2] = col_2;
@@ -143,6 +147,76 @@ void init_led8x8(
 	led->row[7] = row_7;
 	led->col_port = col_port;
 	led->row_port = row_port;
-	memcpy(led->cur_matrix_buffer, cur_matrix_buffer, sizeof(led->cur_matrix_buffer));
+	led->cur_matrix_buffer = (uint8_t*)malloc(8* sizeof(uint8_t));
+	led->cur_matrix_buffer = cur_matrix_buffer;
+	led->index_buffer = 0;
 	led->index_led_matrix = 0;
+	led->index_buffer = 0;
+	led->max_size_buffer = max_size_buffer;
 }
+
+
+void clear_Led_8x8(struct led8x8* led){
+	for(int i = 0; i < 8; i++){
+		HAL_GPIO_WritePin(led->col_port, led->col[i], SET);
+		HAL_GPIO_WritePin(led->row_port, led->row[i], SET);
+	}
+}
+
+void scanRowMatrix(struct led8x8* led){
+	for(int i = 0; i < 8; i++){
+		if((led->cur_matrix_buffer[led->index_led_matrix] >> i) & 0x01){
+			HAL_GPIO_WritePin(led->row_port, led->row[i], RESET);
+		}
+	}
+}
+void updateCurBuffer(struct led8x8* led){
+	led->index_buffer += 1;
+	if(led->index_buffer + 8 <= led->max_size_buffer){
+		led->cur_matrix_buffer += sizeof(uint8_t);
+	}
+	else if(led->index_buffer < led->max_size_buffer){
+		led->cur_matrix_buffer += sizeof(uint8_t);
+		led->cur_matrix_buffer[8] = 0x00;
+	}
+	else {
+		led->cur_matrix_buffer -= (led->index_buffer - 1)* sizeof(uint8_t);
+		led->index_buffer = 0;
+	}
+}
+
+void updateLEDMatrix(struct led8x8* led) {
+	clear_Led_8x8(led);
+	clear_Led_8x8(led);
+	switch(led->index_led_matrix){
+		case 0:
+			HAL_GPIO_WritePin(led->col_port, led->col[0], RESET);
+			break;
+		case 1:
+			HAL_GPIO_WritePin(led->col_port, led->col[1], RESET);
+			break;
+		case 2:
+			HAL_GPIO_WritePin(led->col_port, led->col[2], RESET);
+			break;
+		case 3:
+			HAL_GPIO_WritePin(led->col_port, led->col[3], RESET);
+			break;
+		case 4:
+			HAL_GPIO_WritePin(led->col_port, led->col[4], RESET);
+			break;
+		case 5:
+			HAL_GPIO_WritePin(led->col_port, led->col[5], RESET);
+			break;
+		case 6:
+			HAL_GPIO_WritePin(led->col_port, led->col[6], RESET);
+			break;
+		case 7:
+			HAL_GPIO_WritePin(led->col_port, led->col[7], RESET);
+			break;
+		default:
+			break;
+	}
+	scanRowMatrix(led);
+	led->index_led_matrix++;
+}
+

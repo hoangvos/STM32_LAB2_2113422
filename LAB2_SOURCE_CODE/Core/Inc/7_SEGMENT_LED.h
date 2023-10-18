@@ -16,11 +16,18 @@ struct led8x8{
 	GPIO_TypeDef* row_port;
 	uint16_t col[8];
 	uint16_t row[8];
-	uint8_t cur_matrix_buffer[8];
+	uint8_t* cur_matrix_buffer;
+	uint8_t* next_matix_buffer;
 	int index_led_matrix;
+	int index_buffer;
+	int max_size_buffer;
 };
 
 void display7SEG(int num);
+void clear_Led_8x8(struct led8x8* led);
+void scanRowMatrix(struct led8x8* led);
+void updateCurBuffer(struct led8x8* led);
+void updateLEDMatrix(struct led8x8* led);
 void init_led8x8(
 		struct led8x8* led,
 		uint16_t col_0,
@@ -41,6 +48,7 @@ void init_led8x8(
 		uint16_t row_7,
 		GPIO_TypeDef* col_port,
 		GPIO_TypeDef* row_port,
-		uint8_t cur_matrix_buffer[]);
+		uint8_t* cur_matrix_buffer,
+		int max_size_buffer);
 
 #endif /* INC_7_SEGMENT_LED_H_ */
