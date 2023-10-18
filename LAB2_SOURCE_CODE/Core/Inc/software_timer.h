@@ -10,9 +10,13 @@
 
 extern int counter;
 extern int flag;
+extern int counter_8;
+extern int flag_8;
+
 
 void timer_run();
 void set_timer(int num);
+void set_timer_8(int num);
 
 
 #endif /* INC_SOFTWARE_TIMER_H_ */
